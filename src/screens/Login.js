@@ -13,53 +13,60 @@ import {
   ScrollView,
 } from 'react-native';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleLogin = async () => {
-    // Validasi input
-    if (!email || !password) {
-      Alert.alert('Error', 'Silakan isi semua field');
-      return;
-    }
+//   const handleLogin = async () => {
+//     // Validasi input
+//     if (!email || !password) {
+//       Alert.alert('Error', 'Silakan isi semua field');
+//       return;
+//     }
 
-    if (!validateEmail(email)) {
-      Alert.alert('Error', 'Format email tidak valid');
-      return;
-    }
+//     if (!validateEmail(email)) {
+//       Alert.alert('Error', 'Format email tidak valid');
+//       return;
+//     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password minimal 6 karakter');
-      return;
-    }
+//     if (password.length < 6) {
+//       Alert.alert('Error', 'Password minimal 6 karakter');
+//       return;
+//     }
 
-    setIsLoading(true);
+//     setIsLoading(true);
 
-    try {
-      // Simulasi API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+//     try {
+//       // Simulasi API call
+//       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Di sini Anda bisa menambahkan logic untuk API authentication
-      // const response = await authAPI.login(email, password);
+//       // Di sini Anda bisa menambahkan logic untuk API authentication
+//       // const response = await authAPI.login(email, password);
       
-      Alert.alert('Sukses', 'Login berhasil!');
-      // Navigate ke screen selanjutnya
-      // navigation.navigate('Home');
+//       Alert.alert('Sukses', 'Login berhasil!');
+//       // Navigate ke screen selanjutnya
+//       // navigation.navigate('Home');
       
-    } catch (error) {
-      Alert.alert('Error', 'Login gagal. Silakan coba lagi.');
-    } finally {
-      setIsLoading(false);
-    }
+//     } catch (error) {
+//       Alert.alert('Error', 'Login gagal. Silakan coba lagi.');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+  const handleLogin = () => {
+    // skip validasi langsung ke Dashboard
+    navigation.replace('Dashboard'); 
   };
+
 
   const handleForgotPassword = () => {
     Alert.alert('Info', 'Fitur lupa password akan segera tersedia');
@@ -69,6 +76,8 @@ const LoginScreen = () => {
     Alert.alert('Info', 'Navigasi ke halaman register');
     // navigation.navigate('Register');
   };
+  
+  
 
   return (
     <SafeAreaView style={styles.container}>

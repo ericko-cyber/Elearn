@@ -1,42 +1,20 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import 'react-native-gesture-handler';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-} from 'react-native-safe-area-context';
-
-// 🔹 Import halaman Login
 import Login from './src/screens/Login';
+import Dashboard from './src/screens/Dashboard';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+const Stack = createNativeStackNavigator();
 
+export default function App() {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Dashboard" component={Dashboard} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-function AppContent() {
-  return (
-    <View style={styles.container}>
-      {/* 🔹 Render Login screen */}
-      <Login />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
