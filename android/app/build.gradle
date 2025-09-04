@@ -76,6 +76,10 @@ android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
+    project.ext.vectoricons = [
+    iconFontNames: [ 'MaterialIcons.ttf' ] // bisa tambah font lain
+    ]
+    apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
     namespace "com.elearn"
     defaultConfig {

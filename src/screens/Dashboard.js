@@ -1,36 +1,52 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native'
-import React from 'react'
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import React from 'react';
 
 // Dashboard Component
-export default function Dashboard() {
+export default function Dashboard({navigation}) {
   const menuItems = [
     { title: 'Kuis Presensi', icon: '✅', color: '#3B82F6' },
     { title: 'Tugas', icon: '📝', color: '#10B981' },
     { title: 'Jadwal UTS', icon: '📅', color: '#F59E0B' },
     { title: 'Jadwal UAS', icon: '📋', color: '#EF4444' },
-    { title: 'Nilai', icon: '🏆', color: '#8B5CF6' },
+    { title: 'Buka Kamera', icon: '📸', color: '#8B5CF6' },
     { title: 'Informasi', icon: 'ℹ️', color: '#06B6D4' },
   ];
 
+  const handlePress = item => {
+    if (item.title === 'Buka Kamera') {
+      navigation.navigate('Camera');
+    } else {
+      alert(`Kamu pilih ${item.title}`);
+    }
+  };
+
   const assignments = [
-    { 
-      title: 'Quiz Pilihan Ganda', 
+    {
+      title: 'Quiz Pilihan Ganda',
       subtitle: 'Komputer dan Jaringan Dasar',
       date: '21 Jul 2024',
-      status: 'pending'
+      status: 'pending',
     },
-    { 
-      title: 'Tugas Membuat Makalah', 
+    {
+      title: 'Tugas Membuat Makalah',
       subtitle: 'Pembuatan Aplikasi dan Web Praktis',
       date: '22 Jul 2024',
-      status: 'pending'
+      status: 'pending',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -42,12 +58,21 @@ export default function Dashboard() {
             <Text style={styles.notificationIcon}>🔔</Text>
           </TouchableOpacity>
         </View>
-        
+
         {/* Menu Grid */}
         <View style={styles.menuGrid}>
           {menuItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem}>
-              <View style={[styles.menuIconContainer, { backgroundColor: item.color }]}>
+            <TouchableOpacity
+              key={index}
+              style={styles.menuItem}
+              onPress={() => handlePress(item)} // 👈 panggil fungsi handlePress
+            >
+              <View
+                style={[
+                  styles.menuIconContainer,
+                  { backgroundColor: item.color },
+                ]}
+              >
                 <Text style={styles.menuIcon}>{item.icon}</Text>
               </View>
               <Text style={styles.menuText}>{item.title}</Text>
@@ -59,20 +84,50 @@ export default function Dashboard() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Presensi Hari Ini */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Presensi Hari Ini</Text>
+          <Text style={styles.sectionTitle}>Presensi Hari Ini </Text>
           <TouchableOpacity style={styles.presenceCard}>
             <View style={styles.presenceLeft}>
               <View style={styles.presenceIcon}>
                 <Text style={styles.presenceIconText}>👤</Text>
               </View>
               <View>
-                <Text style={styles.presenceTitle}>Pembelajaran Teactha Medina</Text>
+                <Text style={styles.presenceTitle}>
+                  Pembelajaran Teactha Medina
+                </Text>
                 <Text style={styles.presenceSubtitle}>XII TKJ 1</Text>
               </View>
             </View>
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
-          
+          <TouchableOpacity style={styles.presenceCard}>
+            <View style={styles.presenceLeft}>
+              <View style={styles.presenceIcon}>
+                <Text style={styles.presenceIconText}>👤</Text>
+              </View>
+              <View>
+                <Text style={styles.presenceTitle}>
+                  Pembelajaran Teactha Medina
+                </Text>
+                <Text style={styles.presenceSubtitle}>XII TKJ 1</Text>
+              </View>
+            </View>
+            <Text style={styles.arrow}>›</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.presenceCard}>
+            <View style={styles.presenceLeft}>
+              <View style={styles.presenceIcon}>
+                <Text style={styles.presenceIconText}>👤</Text>
+              </View>
+              <View>
+                <Text style={styles.presenceTitle}>
+                  Pembelajaran Teactha Medina
+                </Text>
+                <Text style={styles.presenceSubtitle}>XII TKJ 1</Text>
+              </View>
+            </View>
+            <Text style={styles.arrow}>›</Text>
+          </TouchableOpacity>
+
           <View style={styles.dateTimeRow}>
             <View style={styles.dateTime}>
               <Text style={styles.dateTimeIcon}>📅</Text>
@@ -93,7 +148,7 @@ export default function Dashboard() {
               <Text style={styles.seeAll}>Lihat Semua</Text>
             </TouchableOpacity>
           </View>
-          
+
           {assignments.map((assignment, index) => (
             <TouchableOpacity key={index} style={styles.assignmentCard}>
               <View style={styles.assignmentLeft}>
@@ -102,7 +157,9 @@ export default function Dashboard() {
                 </View>
                 <View style={styles.assignmentInfo}>
                   <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-                  <Text style={styles.assignmentSubtitle}>{assignment.subtitle}</Text>
+                  <Text style={styles.assignmentSubtitle}>
+                    {assignment.subtitle}
+                  </Text>
                 </View>
               </View>
               <View style={styles.assignmentRight}>
@@ -135,8 +192,6 @@ export default function Dashboard() {
     </SafeAreaView>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -374,4 +429,4 @@ const styles = StyleSheet.create({
     color: '#4F46E5',
     fontWeight: '600',
   },
-})
+});
