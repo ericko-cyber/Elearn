@@ -1,12 +1,15 @@
+// App.js - Updated Navigation Setup
 import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+
+
 import Login from './src/screens/Login';
 import Dashboard from './src/screens/Dashboard';
 import CameraScreen from './src/screens/CameraScreen';
-
+import MateriEyeTracking from './src/screens/MateriEyeTracking';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +20,13 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Camera" component={CameraScreen} />
+        <Stack.Screen 
+          name="MateriEyeTracking" 
+          component={MateriEyeTracking}
+          options={{
+            gestureEnabled: false, // Disable swipe back to prevent accidental exit during tracking
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
