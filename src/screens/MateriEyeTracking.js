@@ -20,7 +20,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function MateriEyeTracking({ route, navigation }) {
   const { materi } = route.params;
-  
+
   const [isTracking, setIsTracking] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(null);
   const [isLoadingPermission, setIsLoadingPermission] = useState(true);
@@ -33,24 +33,25 @@ export default function MateriEyeTracking({ route, navigation }) {
   });
   const [currentFocus, setCurrentFocus] = useState(true);
   const [isSimulatingEyeTracking, setIsSimulatingEyeTracking] = useState(false);
-  
+
   const device = useCameraDevice('front');
   const trackingInterval = useRef(null);
   const lastFocusTime = useRef(Date.now());
   const startTime = useRef(Date.now());
 
   // Data konten materi berdasarkan ID
-  const getMateriContent = (materiId) => {
+  const getMateriContent = materiId => {
     const contents = {
       1: {
-        title: "Game Design Fundamentals",
+        title: 'Game Design Fundamentals',
         sections: [
           {
-            title: "Apa itu Game Design?",
-            content: "Game Design adalah proses kreatif dalam merancang konten dan aturan permainan. Seorang game designer bertanggung jawab untuk menciptakan pengalaman bermain yang menyenangkan dan engaging bagi para pemain.\n\nGame designer harus memahami psikologi pemain, mekanik gameplay yang menyenangkan, dan cara menciptakan tantangan yang seimbang."
+            title: 'Apa itu Game Design?',
+            content:
+              'Game Design adalah proses kreatif dalam merancang konten dan aturan permainan. Seorang game designer bertanggung jawab untuk menciptakan pengalaman bermain yang menyenangkan dan engaging bagi para pemain.\n\nGame designer harus memahami psikologi pemain, mekanik gameplay yang menyenangkan, dan cara menciptakan tantangan yang seimbang.',
           },
           {
-            title: "Elemen Utama Game Design",
+            title: 'Elemen Utama Game Design',
             content: `1. Core Mechanics
 • Player Actions - Apa yang bisa dilakukan pemain
 • Game Rules - Aturan yang mengatur permainan  
@@ -67,10 +68,10 @@ export default function MateriEyeTracking({ route, navigation }) {
 • Interface Design - Desain antarmuka yang intuitif
 • Feedback Systems - Sistem umpan balik untuk pemain
 • Learning Curve - Kurva pembelajaran yang tepat
-• Accessibility - Kemudahan akses untuk semua pemain`
+• Accessibility - Kemudahan akses untuk semua pemain`,
           },
           {
-            title: "Prinsip Game Design",
+            title: 'Prinsip Game Design',
             content: `Player-Centered Design: Semua keputusan design harus berpusat pada pengalaman pemain. Pertanyaan utama: "Apakah ini menyenangkan untuk pemain?"
 
 Meaningful Choices: Berikan pemain pilihan yang bermakna dan berdampak pada gameplay. Setiap keputusan harus memiliki konsekuensi.
@@ -79,10 +80,10 @@ Clear Goals: Pemain harus selalu tahu apa yang harus mereka lakukan selanjutnya.
 
 Balanced Challenge: Game harus challenging tapi tidak frustrating. Tingkat kesulitan harus seimbang dengan kemampuan pemain.
 
-Flow State: Ciptakan kondisi dimana pemain benar-benar tenggelam dalam permainan (flow state).`
+Flow State: Ciptakan kondisi dimana pemain benar-benar tenggelam dalam permainan (flow state).`,
           },
           {
-            title: "Tools dan Prototyping",
+            title: 'Tools dan Prototyping',
             content: `Game Design Tools:
 • Game Engines: Unity, Unreal Engine, Godot
 • Prototyping Tools: Figma, Adobe XD, Balsamiq
@@ -95,15 +96,15 @@ Prototyping Process:
 3. Playable Prototype - Versi yang bisa dimainkan
 4. Vertical Slice - Sebagian kecil yang representatif
 5. Alpha Build - Fitur lengkap tapi masih bug
-6. Beta Build - Siap untuk testing eksternal`
-          }
-        ]
+6. Beta Build - Siap untuk testing eksternal`,
+          },
+        ],
       },
       2: {
-        title: "React Native Development Setup",
+        title: 'React Native Development Setup',
         sections: [
           {
-            title: "Setup Environment React Native",
+            title: 'Setup Environment React Native',
             content: `React Native adalah framework untuk membuat aplikasi mobile menggunakan React. Untuk memulai, kita perlu setup development environment yang tepat.
 
 Kebutuhan System:
@@ -111,10 +112,10 @@ Kebutuhan System:
 • Java Development Kit (JDK 11 atau 17)
 • Android Studio untuk Android development
 • Xcode untuk iOS development (Mac only)
-• React Native CLI atau Expo CLI`
+• React Native CLI atau Expo CLI`,
           },
           {
-            title: "Instalasi React Native CLI",
+            title: 'Instalasi React Native CLI',
             content: `Langkah-langkah instalasi:
 
 1. Install Node.js dari nodejs.org
@@ -130,10 +131,10 @@ Kebutuhan System:
 4. Setup Environment Variables:
    - ANDROID_HOME: path ke Android SDK
    - JAVA_HOME: path ke JDK
-   - Update PATH untuk include Android tools`
+   - Update PATH untuk include Android tools`,
           },
           {
-            title: "Membuat Project Baru",
+            title: 'Membuat Project Baru',
             content: `Untuk membuat project React Native baru:
 
 npx react-native@latest init MyFirstApp
@@ -147,10 +148,10 @@ Struktur Folder:
 • App.js - Main component
 • package.json - Dependencies dan scripts
 • metro.config.js - Metro bundler configuration
-• babel.config.js - Babel configuration`
+• babel.config.js - Babel configuration`,
           },
           {
-            title: "Development Workflow",
+            title: 'Development Workflow',
             content: `Development Best Practices:
 
 1. Hot Reloading
@@ -170,15 +171,15 @@ Struktur Folder:
 4. Performance Monitoring
    - Monitor bundle size
    - Profiling dengan Hermes
-   - Memory leak detection`
-          }
-        ]
+   - Memory leak detection`,
+          },
+        ],
       },
       3: {
-        title: "Algoritma dan Struktur Data",
+        title: 'Algoritma dan Struktur Data',
         sections: [
           {
-            title: "Pengenalan Algoritma",
+            title: 'Pengenalan Algoritma',
             content: `Algoritma adalah langkah-langkah logis yang disusun secara sistematis untuk menyelesaikan suatu masalah atau mencapai tujuan tertentu.
 
 Karakteristik Algoritma:
@@ -191,10 +192,10 @@ Karakteristik Algoritma:
 Representasi Algoritma:
 • Pseudocode - Deskripsi informal menggunakan bahasa natural
 • Flowchart - Diagram alur visual
-• Code - Implementasi dalam bahasa pemrograman`
+• Code - Implementasi dalam bahasa pemrograman`,
           },
           {
-            title: "Struktur Data Fundamental",
+            title: 'Struktur Data Fundamental',
             content: `Array: Struktur data yang menyimpan elemen dalam urutan tertentu
 • Akses elemen: O(1)
 • Pencarian: O(n)
@@ -213,10 +214,10 @@ Stack: Struktur data LIFO (Last In, First Out)
 Queue: Struktur data FIFO (First In, First Out)
 • Enqueue: menambah elemen di belakang - O(1)
 • Dequeue: menghapus elemen di depan - O(1)
-• Front: melihat elemen terdepan - O(1)`
+• Front: melihat elemen terdepan - O(1)`,
           },
           {
-            title: "Analisis Kompleksitas",
+            title: 'Analisis Kompleksitas',
             content: `Big O Notation menganalisis efisiensi algoritma:
 
 O(1) - Constant Time
@@ -246,10 +247,10 @@ O(n²) - Quadratic Time
 O(2ⁿ) - Exponential Time
 • Recursive fibonacci (naive)
 • Subset generation
-• Tower of Hanoi`
+• Tower of Hanoi`,
           },
           {
-            title: "Algoritma Sorting",
+            title: 'Algoritma Sorting',
             content: `Bubble Sort - O(n²)
 • Sederhana tapi tidak efisien
 • Membandingkan elemen bersebelahan
@@ -273,15 +274,15 @@ Merge Sort - O(n log n)
 Quick Sort - O(n log n) average, O(n²) worst
 • In-place sorting
 • Pivot selection mempengaruhi performance
-• Tidak stable tapi sangat cepat rata-rata`
-          }
-        ]
+• Tidak stable tapi sangat cepat rata-rata`,
+          },
+        ],
       },
       4: {
-        title: "UI/UX Design Principles",
+        title: 'UI/UX Design Principles',
         sections: [
           {
-            title: "Fundamental UI Design",
+            title: 'Fundamental UI Design',
             content: `User Interface (UI) Design berfokus pada tampilan visual dan interaksi pengguna dengan produk digital.
 
 Prinsip Dasar UI:
@@ -296,10 +297,10 @@ Visual Hierarchy:
 • Color - Kontras untuk menarik perhatian
 • Typography - Font weight dan style
 • Spacing - White space untuk grouping
-• Position - Placement yang strategis`
+• Position - Placement yang strategis`,
           },
           {
-            title: "User Experience (UX) Fundamentals",
+            title: 'User Experience (UX) Fundamentals',
             content: `UX Design berfokus pada keseluruhan pengalaman pengguna saat menggunakan produk.
 
 UX Design Process:
@@ -315,10 +316,10 @@ Elemen UX Design:
 • Information Architecture - Struktur dan organisasi konten
 • Wireframing - Sketsa layout dan struktur halaman
 • Prototyping - Model interaktif untuk testing
-• Usability Testing - Menguji kemudahan penggunaan produk`
+• Usability Testing - Menguji kemudahan penggunaan produk`,
           },
           {
-            title: "Design System & Components",
+            title: 'Design System & Components',
             content: `Design System adalah kumpulan reusable components dan guidelines yang memastikan konsistensi design.
 
 Komponen Design System:
@@ -341,10 +342,10 @@ Benefits:
 • Faster development cycle
 • Better collaboration
 • Easier maintenance
-• Scalable design language`
+• Scalable design language`,
           },
           {
-            title: "Mobile-First Design",
+            title: 'Mobile-First Design',
             content: `Mobile-First adalah pendekatan design yang dimulai dari mobile device kemudian scale up ke desktop.
 
 Mobile Design Considerations:
@@ -365,12 +366,12 @@ iOS vs Android Guidelines:
 • iOS Human Interface Guidelines (HIG)
 • Material Design untuk Android
 • Platform-specific patterns dan behaviors
-• Native vs cross-platform considerations`
-          }
-        ]
-      }
+• Native vs cross-platform considerations`,
+          },
+        ],
+      },
     };
-    
+
     return contents[materiId] || contents[1];
   };
 
@@ -378,11 +379,14 @@ iOS vs Android Guidelines:
 
   useEffect(() => {
     initializePermissions();
-    
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleBackPress();
-      return true;
-    });
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        handleBackPress();
+        return true;
+      },
+    );
 
     return () => {
       backHandler.remove();
@@ -394,21 +398,27 @@ iOS vs Android Guidelines:
 
   const initializePermissions = async () => {
     setIsLoadingPermission(true);
-    
+
     try {
       // Check camera permission directly
       const cameraPermissionStatus = await Camera.getCameraPermissionStatus();
       console.log('Camera permission status:', cameraPermissionStatus);
-      
-      if (cameraPermissionStatus === 'granted' || cameraPermissionStatus === 'authorized') {
+
+      if (
+        cameraPermissionStatus === 'granted' ||
+        cameraPermissionStatus === 'authorized'
+      ) {
         setCameraPermission(true);
         startTracking();
       } else if (cameraPermissionStatus === 'not-determined') {
         // Request permission
         const newPermissionStatus = await Camera.requestCameraPermission();
         console.log('New permission status:', newPermissionStatus);
-        
-        if (newPermissionStatus === 'granted' || newPermissionStatus === 'authorized') {
+
+        if (
+          newPermissionStatus === 'granted' ||
+          newPermissionStatus === 'authorized'
+        ) {
           setCameraPermission(true);
           startTracking();
         } else {
@@ -434,11 +444,11 @@ iOS vs Android Guidelines:
 
   const handleRequestPermission = async () => {
     setIsLoadingPermission(true);
-    
+
     try {
       const permissionStatus = await Camera.requestCameraPermission();
       console.log('Permission request result:', permissionStatus);
-      
+
       if (permissionStatus === 'granted' || permissionStatus === 'authorized') {
         setCameraPermission(true);
         setIsSimulatingEyeTracking(false);
@@ -451,14 +461,14 @@ iOS vs Android Guidelines:
           'Untuk menggunakan eye tracking yang akurat, mohon aktifkan izin kamera di pengaturan aplikasi.',
           [
             { text: 'Nanti Saja', style: 'cancel' },
-            { 
-              text: 'Buka Pengaturan', 
+            {
+              text: 'Buka Pengaturan',
               onPress: () => {
                 // Open app settings
                 Linking.openSettings();
-              }
-            }
-          ]
+              },
+            },
+          ],
         );
       }
     } catch (error) {
@@ -472,7 +482,7 @@ iOS vs Android Guidelines:
     setIsTracking(true);
     startTime.current = Date.now();
     lastFocusTime.current = Date.now();
-    
+
     // Start simulated eye tracking if no camera permission
     if (isSimulatingEyeTracking || !cameraPermission) {
       startSimulatedTracking();
@@ -488,13 +498,13 @@ iOS vs Android Guidelines:
     }, 1000);
   };
 
-  const updateTrackingData = (isFocused) => {
+  const updateTrackingData = isFocused => {
     const now = Date.now();
-    
+
     setTrackingData(prev => {
       const newData = { ...prev };
       newData.totalTime += 1;
-      
+
       if (isFocused) {
         newData.focusTime += 1;
       } else {
@@ -502,29 +512,30 @@ iOS vs Android Guidelines:
           newData.distractionCount += 1;
         }
       }
-      
-      newData.attentionScore = newData.totalTime > 0 
-        ? Math.round((newData.focusTime / newData.totalTime) * 100)
-        : 100;
-      
+
+      newData.attentionScore =
+        newData.totalTime > 0
+          ? Math.round((newData.focusTime / newData.totalTime) * 100)
+          : 100;
+
       // Store eye movement data
       newData.eyeMovements.push({
         timestamp: now,
         focused: isFocused,
         simulated: isSimulatingEyeTracking || !cameraPermission,
       });
-      
+
       return newData;
     });
   };
 
   const handleBackPress = () => {
     setIsTracking(false);
-    
+
     if (trackingInterval.current) {
       clearInterval(trackingInterval.current);
     }
-    
+
     // Calculate final session data
     const sessionDuration = Math.floor((Date.now() - startTime.current) / 1000);
     const finalData = {
@@ -537,35 +548,43 @@ iOS vs Android Guidelines:
       trackingMode: cameraPermission ? 'camera' : 'simulated',
       ...trackingData,
     };
-    
+
     // Here you would save to database
     console.log('Saving tracking data:', finalData);
-    
+
     Alert.alert(
       'Sesi Pembelajaran Selesai',
-      `${materi.title}\n\nWaktu belajar: ${formatTime(trackingData.totalTime)}\nWaktu fokus: ${formatTime(trackingData.focusTime)}\nSkor perhatian: ${trackingData.attentionScore}%\nGangguan: ${trackingData.distractionCount}x${!cameraPermission ? '\n\n*Mode simulasi - untuk tracking akurat, berikan izin kamera' : ''}`,
+      `${materi.title}\n\nWaktu belajar: ${formatTime(
+        trackingData.totalTime,
+      )}\nWaktu fokus: ${formatTime(trackingData.focusTime)}\nSkor perhatian: ${
+        trackingData.attentionScore
+      }%\nGangguan: ${trackingData.distractionCount}x${
+        !cameraPermission
+          ? '\n\n*Mode simulasi - untuk tracking akurat, berikan izin kamera'
+          : ''
+      }`,
       [
-        { 
-          text: 'OK', 
-          onPress: () => navigation.goBack()
-        }
-      ]
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ],
     );
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getAttentionColor = (score) => {
+  const getAttentionColor = score => {
     if (score >= 80) return '#10B981';
     if (score >= 60) return '#F59E0B';
     return '#EF4444';
   };
 
-  const getAttentionText = (score) => {
+  const getAttentionText = score => {
     if (score >= 80) return 'Sangat Baik';
     if (score >= 60) return 'Baik';
     return 'Perlu Peningkatan';
@@ -584,18 +603,23 @@ iOS vs Android Guidelines:
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
-      
+
       {/* Header dengan tracking info */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Kembali</Text>
           </TouchableOpacity>
-          
+
           <View style={styles.trackingInfo}>
-            <View style={[styles.focusIndicator, { 
-              backgroundColor: currentFocus ? '#10B981' : '#EF4444' 
-            }]}>
+            <View
+              style={[
+                styles.focusIndicator,
+                {
+                  backgroundColor: currentFocus ? '#10B981' : '#EF4444',
+                },
+              ]}
+            >
               <Text style={styles.focusText}>
                 {currentFocus ? '👁 Fokus' : '👁 Tidak Fokus'}
               </Text>
@@ -607,7 +631,7 @@ iOS vs Android Guidelines:
           <Text style={styles.materiTitle}>{materi.title}</Text>
           <Text style={styles.materiSubtitle}>{materi.subtitle}</Text>
         </View>
-        
+
         {/* Camera container fixed di dalam header */}
         <View style={styles.cameraContainer}>
           {cameraPermission && device && (
@@ -618,7 +642,7 @@ iOS vs Android Guidelines:
               // Note: Face detection will be implemented with ML Kit separately
             />
           )}
-          
+
           {/* Simulated camera view */}
           {(!cameraPermission || isSimulatingEyeTracking) && (
             <View style={styles.simulatedCamera}>
@@ -627,10 +651,10 @@ iOS vs Android Guidelines:
             </View>
           )}
         </View>
-        
+
         {/* Permission button di bawah camera */}
         {!cameraPermission && (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleRequestPermission}
             style={styles.permissionButton}
             disabled={isLoadingPermission}
@@ -650,7 +674,7 @@ iOS vs Android Guidelines:
             <Text style={styles.sectionContent}>{section.content}</Text>
           </View>
         ))}
-        
+
         <View style={styles.bottomPadding} />
       </ScrollView>
 
@@ -658,25 +682,37 @@ iOS vs Android Guidelines:
       <View style={styles.statsPanel}>
         <View style={styles.statsHeader}>
           <Text style={styles.statsTitle}>
-            Live Tracking {(!cameraPermission || isSimulatingEyeTracking) && '(Simulasi)'}
+            Live Tracking{' '}
+            {(!cameraPermission || isSimulatingEyeTracking) && '(Simulasi)'}
           </Text>
-          <Text style={styles.timeText}>⏱ {formatTime(trackingData.totalTime)}</Text>
+          <Text style={styles.timeText}>
+            ⏱ {formatTime(trackingData.totalTime)}
+          </Text>
         </View>
-        
+
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Fokus</Text>
-            <Text style={styles.statValue}>{formatTime(trackingData.focusTime)}</Text>
+            <Text style={styles.statValue}>
+              {formatTime(trackingData.focusTime)}
+            </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Gangguan</Text>
-            <Text style={styles.statValue}>{trackingData.distractionCount}x</Text>
+            <Text style={styles.statValue}>
+              {trackingData.distractionCount}x
+            </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Skor</Text>
-            <Text style={[styles.statValue, { 
-              color: getAttentionColor(trackingData.attentionScore) 
-            }]}>
+            <Text
+              style={[
+                styles.statValue,
+                {
+                  color: getAttentionColor(trackingData.attentionScore),
+                },
+              ]}
+            >
               {trackingData.attentionScore}%
             </Text>
           </View>
@@ -687,11 +723,16 @@ iOS vs Android Guidelines:
             Tingkat Perhatian: {getAttentionText(trackingData.attentionScore)}
           </Text>
           <View style={styles.progressBar}>
-            <View 
-              style={[styles.progressFill, {
-                width: `${trackingData.attentionScore}%`,
-                backgroundColor: getAttentionColor(trackingData.attentionScore)
-              }]}
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${trackingData.attentionScore}%`,
+                  backgroundColor: getAttentionColor(
+                    trackingData.attentionScore,
+                  ),
+                },
+              ]}
             />
           </View>
         </View>
@@ -699,7 +740,8 @@ iOS vs Android Guidelines:
         {!cameraPermission && (
           <View style={styles.infoNote}>
             <Text style={styles.infoNoteText}>
-              💡 Mode simulasi aktif. Berikan izin kamera untuk eye tracking yang akurat.
+              💡 Mode simulasi aktif. Berikan izin kamera untuk eye tracking
+              yang akurat.
             </Text>
           </View>
         )}
