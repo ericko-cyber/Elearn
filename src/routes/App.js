@@ -1,21 +1,26 @@
 // import React from 'react';
 // import { View, StyleSheet, Text } from 'react-native';
+// import { NavigationContainer } from '@react-navigation/native';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// import { createStaticNavigation } from '@react-navigation/native';
 
-// // Import components
-// import HomeScreen from './components/HomeScreen';
-// import ProfileScreen from './components/ProfileScreen';
-// import BottomNavigation from './components/BottomNavigation';
-// import CameraScreen from './components/CameraScreen';
-// import LoginScreen from './components/Login'; // ✅ Tambahkan ini
+// // Import components & screens
+// import HomeScreen from '../components/HomeScreen';
+// import ProfileScreen from '../components/ProfileScreen';
+// import BottomNavigation from '../components/BottomNavigation';
+// import CameraScreen from '../components/CameraScreen';
+// import LoginScreen from '../components/Login';
+// import RegisterScreen from '../components/Register';
+
+// const Stack = createNativeStackNavigator();
 
 // // Placeholder screens
 // const CoursesScreen = () => (
 //   <View style={styles.placeholderContainer}>
 //     <View style={styles.placeholderContent}>
 //       <Text style={styles.placeholderTitle}>My Courses</Text>
-//       <Text style={styles.placeholderText}>Halaman My Courses akan segera tersedia</Text>
+//       <Text style={styles.placeholderText}>
+//         Halaman My Courses akan segera tersedia
+//       </Text>
 //     </View>
 //     <BottomNavigation />
 //   </View>
@@ -25,7 +30,9 @@
 //   <View style={styles.placeholderContainer}>
 //     <View style={styles.placeholderContent}>
 //       <Text style={styles.placeholderTitle}>Notifications</Text>
-//       <Text style={styles.placeholderText}>Halaman Notifications akan segera tersedia</Text>
+//       <Text style={styles.placeholderText}>
+//         Halaman Notifications akan segera tersedia
+//       </Text>
 //     </View>
 //     <BottomNavigation />
 //   </View>
@@ -55,40 +62,23 @@
 //   return <CameraScreen navigation={navigation} />;
 // };
 
-// // ✅ Stack navigator dengan Login sebagai awal
-// const RootStack = createNativeStackNavigator({
-//   screens: {
-//     Login: {
-//       screen: LoginScreen,
-//       options: { headerShown: false },
-//     },
-//     Home: {
-//       screen: HomeScreenWithNav,
-//       options: { headerShown: false },
-//     },
-//     Profile: {
-//       screen: ProfileScreenWithNav,
-//       options: { headerShown: false },
-//     },
-//     Courses: {
-//       screen: CoursesScreen,
-//       options: { headerShown: false },
-//     },
-//     Notifications: {
-//       screen: NotificationsScreen,
-//       options: { headerShown: false },
-//     },
-//     Camera: {
-//       screen: CameraScreenNoNav,
-//       options: { headerShown: false },
-//     },
-//   },
-// });
-
-// const Navigation = createStaticNavigation(RootStack);
-
 // const App = () => {
-//   return <Navigation />;
+//   return (
+//     <NavigationContainer>
+//       <Stack.Navigator
+//         initialRouteName="Login"
+//         screenOptions={{ headerShown: false }}
+//       >
+//         <Stack.Screen name="Login" component={LoginScreen} />
+//         <Stack.Screen name="Home" component={HomeScreenWithNav} />
+//         <Stack.Screen name="Profile" component={ProfileScreenWithNav} />
+//         <Stack.Screen name="Register" component={RegisterScreen} />
+//         <Stack.Screen name="Courses" component={CoursesScreen} />
+//         <Stack.Screen name="Notifications" component={NotificationsScreen} />
+//         <Stack.Screen name="Camera" component={CameraScreenNoNav} />
+//       </Stack.Navigator>
+//     </NavigationContainer>
+//   );
 // };
 
 // export default App;
@@ -125,13 +115,14 @@ import { View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Import components
-import HomeScreen from './components/HomeScreen';
-import ProfileScreen from './components/ProfileScreen';
-import BottomNavigation from './components/BottomNavigation';
-import CameraScreen from './components/CameraScreen';
-import LoginScreen from './components/Login';
-import RegisterScreen from './components/Register';
+// Import components & screens
+import HomeScreen from '../components/HomeScreen';
+import ProfileScreen from '../components/ProfileScreen';
+import BottomNavigation from '../components/BottomNavigation';
+import CameraScreen from '../components/CameraScreen';
+import LoginScreen from '../components/Login';
+import RegisterScreen from '../components/Register';
+import MateriEyeTrackingScreen from '../components/MateriEyeTracking'; // ✅ tambahkan ini
 
 const Stack = createNativeStackNavigator();
 
@@ -198,6 +189,8 @@ const App = () => {
         <Stack.Screen name="Courses" component={CoursesScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Camera" component={CameraScreenNoNav} />
+        <Stack.Screen name="MateriEyeTracking" component={MateriEyeTrackingScreen} /> 
+        {/* ✅ sudah didaftarkan */}
       </Stack.Navigator>
     </NavigationContainer>
   );
