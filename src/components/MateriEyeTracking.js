@@ -1,11 +1,10 @@
-// MateriEyeTracking.js - Fixed Camera Position
+// MateriEyeTracking.js - Complete PDF Version
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   SafeAreaView,
   StatusBar,
   Dimensions,
@@ -15,401 +14,185 @@ import {
   Linking,
 } from 'react-native';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
+import Pdf from 'react-native-pdf';
 
 const { width, height } = Dimensions.get('window');
 
 export default function MateriEyeTracking({ route, navigation }) {
   const { materi } = route.params;
-  
+
   const [isTracking, setIsTracking] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(null);
   const [isLoadingPermission, setIsLoadingPermission] = useState(true);
+  const [isLoadingPDF, setIsLoadingPDF] = useState(true);
+  const [pdfError, setPdfError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [cameraReady, setCameraReady] = useState(false);
+  
   const [trackingData, setTrackingData] = useState({
     totalTime: 0,
     focusTime: 0,
     distractionCount: 0,
     attentionScore: 100,
     eyeMovements: [],
+    pagesRead: [],
+    timePerPage: {},
   });
+  
   const [currentFocus, setCurrentFocus] = useState(true);
   const [isSimulatingEyeTracking, setIsSimulatingEyeTracking] = useState(false);
-  
+
   const device = useCameraDevice('front');
   const trackingInterval = useRef(null);
   const lastFocusTime = useRef(Date.now());
   const startTime = useRef(Date.now());
+  const pageStartTime = useRef(Date.now());
+  const pdfRef = useRef(null);
 
-  // Data konten materi berdasarkan ID
-  const getMateriContent = (materiId) => {
-    const contents = {
-      1: {
-        title: "Game Design Fundamentals",
-        sections: [
-          {
-            title: "Apa itu Game Design?",
-            content: "Game Design adalah proses kreatif dalam merancang konten dan aturan permainan. Seorang game designer bertanggung jawab untuk menciptakan pengalaman bermain yang menyenangkan dan engaging bagi para pemain.\n\nGame designer harus memahami psikologi pemain, mekanik gameplay yang menyenangkan, dan cara menciptakan tantangan yang seimbang."
-          },
-          {
-            title: "Elemen Utama Game Design",
-            content: `1. Core Mechanics
-• Player Actions - Apa yang bisa dilakukan pemain
-• Game Rules - Aturan yang mengatur permainan  
-• Win/Lose Conditions - Kondisi menang atau kalah
-• Progression System - Sistem kemajuan pemain
-
-2. Game Systems
-• Economy System - Sistem ekonomi dalam game
-• Leveling System - Sistem level dan pengalaman
-• Combat System - Sistem pertarungan atau konflik
-• Reward System - Sistem hadiah dan achievement
-
-3. User Experience (UX)
-• Interface Design - Desain antarmuka yang intuitif
-• Feedback Systems - Sistem umpan balik untuk pemain
-• Learning Curve - Kurva pembelajaran yang tepat
-• Accessibility - Kemudahan akses untuk semua pemain`
-          },
-          {
-            title: "Prinsip Game Design",
-            content: `Player-Centered Design: Semua keputusan design harus berpusat pada pengalaman pemain. Pertanyaan utama: "Apakah ini menyenangkan untuk pemain?"
-
-Meaningful Choices: Berikan pemain pilihan yang bermakna dan berdampak pada gameplay. Setiap keputusan harus memiliki konsekuensi.
-
-Clear Goals: Pemain harus selalu tahu apa yang harus mereka lakukan selanjutnya. Tujuan harus jelas dan dapat dicapai.
-
-Balanced Challenge: Game harus challenging tapi tidak frustrating. Tingkat kesulitan harus seimbang dengan kemampuan pemain.
-
-Flow State: Ciptakan kondisi dimana pemain benar-benar tenggelam dalam permainan (flow state).`
-          },
-          {
-            title: "Tools dan Prototyping",
-            content: `Game Design Tools:
-• Game Engines: Unity, Unreal Engine, Godot
-• Prototyping Tools: Figma, Adobe XD, Balsamiq
-• Documentation: Notion, Confluence, Google Docs
-• Version Control: Git, Perforce
-
-Prototyping Process:
-1. Paper Prototype - Konsep awal di atas kertas
-2. Digital Mockup - Wireframe dan UI mockup
-3. Playable Prototype - Versi yang bisa dimainkan
-4. Vertical Slice - Sebagian kecil yang representatif
-5. Alpha Build - Fitur lengkap tapi masih bug
-6. Beta Build - Siap untuk testing eksternal`
-          }
-        ]
-      },
-      2: {
-        title: "React Native Development Setup",
-        sections: [
-          {
-            title: "Setup Environment React Native",
-            content: `React Native adalah framework untuk membuat aplikasi mobile menggunakan React. Untuk memulai, kita perlu setup development environment yang tepat.
-
-Kebutuhan System:
-• Node.js (versi 16 atau lebih tinggi)
-• Java Development Kit (JDK 11 atau 17)
-• Android Studio untuk Android development
-• Xcode untuk iOS development (Mac only)
-• React Native CLI atau Expo CLI`
-          },
-          {
-            title: "Instalasi React Native CLI",
-            content: `Langkah-langkah instalasi:
-
-1. Install Node.js dari nodejs.org
-2. Install React Native CLI:
-   npm install -g @react-native-community/cli
-
-3. Install Android Studio:
-   - Download dari developer.android.com
-   - Install Android SDK (API 30+)
-   - Setup Android Virtual Device (AVD)
-   - Configure ANDROID_HOME environment variable
-
-4. Setup Environment Variables:
-   - ANDROID_HOME: path ke Android SDK
-   - JAVA_HOME: path ke JDK
-   - Update PATH untuk include Android tools`
-          },
-          {
-            title: "Membuat Project Baru",
-            content: `Untuk membuat project React Native baru:
-
-npx react-native@latest init MyFirstApp
-cd MyFirstApp
-npx react-native run-android
-
-Struktur Folder:
-• android/ - Kode native Android
-• ios/ - Kode native iOS  
-• src/ - Source code JavaScript/TypeScript
-• App.js - Main component
-• package.json - Dependencies dan scripts
-• metro.config.js - Metro bundler configuration
-• babel.config.js - Babel configuration`
-          },
-          {
-            title: "Development Workflow",
-            content: `Development Best Practices:
-
-1. Hot Reloading
-   - Fast Refresh untuk perubahan real-time
-   - Hot reload untuk state preservation
-
-2. Debugging Tools
-   - React Developer Tools
-   - Flipper untuk debugging native
-   - Chrome DevTools untuk JavaScript
-
-3. Testing Strategy
-   - Unit testing dengan Jest
-   - Integration testing
-   - E2E testing dengan Detox
-
-4. Performance Monitoring
-   - Monitor bundle size
-   - Profiling dengan Hermes
-   - Memory leak detection`
-          }
-        ]
-      },
-      3: {
-        title: "Algoritma dan Struktur Data",
-        sections: [
-          {
-            title: "Pengenalan Algoritma",
-            content: `Algoritma adalah langkah-langkah logis yang disusun secara sistematis untuk menyelesaikan suatu masalah atau mencapai tujuan tertentu.
-
-Karakteristik Algoritma:
-• Input - Data masukan yang diperlukan
-• Output - Hasil yang diharapkan
-• Definiteness - Setiap langkah harus jelas dan tidak ambigu
-• Finiteness - Algoritma harus berakhir dalam waktu terbatas
-• Effectiveness - Setiap operasi harus dapat dilakukan
-
-Representasi Algoritma:
-• Pseudocode - Deskripsi informal menggunakan bahasa natural
-• Flowchart - Diagram alur visual
-• Code - Implementasi dalam bahasa pemrograman`
-          },
-          {
-            title: "Struktur Data Fundamental",
-            content: `Array: Struktur data yang menyimpan elemen dalam urutan tertentu
-• Akses elemen: O(1)
-• Pencarian: O(n)
-• Insertion/Deletion: O(n)
-
-Linked List: Struktur data linear dengan pointer
-• Insertion/Deletion: O(1) di head
-• Akses elemen: O(n)
-• Dynamic size
-
-Stack: Struktur data LIFO (Last In, First Out)
-• Push: menambah elemen di atas - O(1)
-• Pop: menghapus elemen teratas - O(1)
-• Peek/Top: melihat elemen teratas - O(1)
-
-Queue: Struktur data FIFO (First In, First Out)
-• Enqueue: menambah elemen di belakang - O(1)
-• Dequeue: menghapus elemen di depan - O(1)
-• Front: melihat elemen terdepan - O(1)`
-          },
-          {
-            title: "Analisis Kompleksitas",
-            content: `Big O Notation menganalisis efisiensi algoritma:
-
-O(1) - Constant Time
-• Akses array dengan indeks
-• Push/pop stack
-• Hash table lookup (average case)
-
-O(log n) - Logarithmic Time  
-• Binary search pada array terurut
-• Tree operations (balanced tree)
-• Divide and conquer algorithms
-
-O(n) - Linear Time
-• Linear search
-• Array traversal
-• Single loop iteration
-
-O(n log n) - Linearithmic Time
-• Efficient sorting (merge sort, heap sort)
-• Building heap from array
-
-O(n²) - Quadratic Time
-• Bubble sort, selection sort
-• Nested loops over same data
-• Naive matrix multiplication
-
-O(2ⁿ) - Exponential Time
-• Recursive fibonacci (naive)
-• Subset generation
-• Tower of Hanoi`
-          },
-          {
-            title: "Algoritma Sorting",
-            content: `Bubble Sort - O(n²)
-• Sederhana tapi tidak efisien
-• Membandingkan elemen bersebelahan
-• Cocok untuk data kecil
-
-Selection Sort - O(n²)
-• Mencari elemen minimum/maximum
-• Swap dengan posisi yang tepat
-• In-place sorting
-
-Insertion Sort - O(n²) worst, O(n) best
-• Efisien untuk data hampir terurut
-• Online algorithm (dapat memproses data streaming)
-• Adaptive sorting
-
-Merge Sort - O(n log n)
-• Divide and conquer approach
-• Stable sorting algorithm
-• Membutuhkan extra space O(n)
-
-Quick Sort - O(n log n) average, O(n²) worst
-• In-place sorting
-• Pivot selection mempengaruhi performance
-• Tidak stable tapi sangat cepat rata-rata`
-          }
-        ]
-      },
-      4: {
-        title: "UI/UX Design Principles",
-        sections: [
-          {
-            title: "Fundamental UI Design",
-            content: `User Interface (UI) Design berfokus pada tampilan visual dan interaksi pengguna dengan produk digital.
-
-Prinsip Dasar UI:
-• Clarity - Antarmuka harus jelas dan mudah dipahami
-• Consistency - Konsistensi dalam elemen dan pola design
-• Familiarity - Menggunakan konvensi yang sudah dikenal user
-• Responsiveness - Memberikan feedback untuk setiap aksi user
-• Efficiency - Memungkinkan user menyelesaikan tugas dengan cepat
-
-Visual Hierarchy:
-• Size - Elemen penting lebih besar
-• Color - Kontras untuk menarik perhatian
-• Typography - Font weight dan style
-• Spacing - White space untuk grouping
-• Position - Placement yang strategis`
-          },
-          {
-            title: "User Experience (UX) Fundamentals",
-            content: `UX Design berfokus pada keseluruhan pengalaman pengguna saat menggunakan produk.
-
-UX Design Process:
-1. Research - User interviews, surveys, analytics
-2. Empathy - User personas dan journey mapping  
-3. Define - Problem statement dan requirements
-4. Ideate - Brainstorming dan concept generation
-5. Prototype - Low-fi sampai high-fi prototypes
-6. Test - Usability testing dan iteration
-
-Elemen UX Design:
-• User Research - Memahami kebutuhan dan perilaku user
-• Information Architecture - Struktur dan organisasi konten
-• Wireframing - Sketsa layout dan struktur halaman
-• Prototyping - Model interaktif untuk testing
-• Usability Testing - Menguji kemudahan penggunaan produk`
-          },
-          {
-            title: "Design System & Components",
-            content: `Design System adalah kumpulan reusable components dan guidelines yang memastikan konsistensi design.
-
-Komponen Design System:
-• Color Palette - Primary, secondary, neutral colors
-• Typography Scale - Heading, body, caption styles
-• Spacing System - 4pt atau 8pt grid system
-• Component Library - Buttons, forms, cards, modals
-• Icon System - Consistent iconography style
-• Grid System - Layout dan responsive behavior
-
-Atomic Design Methodology:
-• Atoms - Basic building blocks (buttons, inputs)
-• Molecules - Simple groups of atoms (search form)
-• Organisms - Complex components (header, sidebar)
-• Templates - Page layout structures
-• Pages - Specific instances of templates
-
-Benefits:
-• Consistency across products
-• Faster development cycle
-• Better collaboration
-• Easier maintenance
-• Scalable design language`
-          },
-          {
-            title: "Mobile-First Design",
-            content: `Mobile-First adalah pendekatan design yang dimulai dari mobile device kemudian scale up ke desktop.
-
-Mobile Design Considerations:
-• Touch Targets - Minimum 44px untuk tap area
-• Thumb Zone - Area yang mudah dijangkau thumb
-• Loading States - Progressive loading untuk koneksi lambat
-• Offline States - Graceful degradation tanpa internet
-• Performance - Optimize untuk device dengan resource terbatas
-
-Responsive Design Principles:
-• Flexible Grid Systems - Using percentages, not pixels
-• Flexible Images - Scale dengan container
-• Media Queries - Breakpoints untuk different screen sizes
-• Progressive Enhancement - Start basic, add features
-• Content Priority - Most important content first
-
-iOS vs Android Guidelines:
-• iOS Human Interface Guidelines (HIG)
-• Material Design untuk Android
-• Platform-specific patterns dan behaviors
-• Native vs cross-platform considerations`
-          }
-        ]
-      }
-    };
+  // ========== PDF FUNCTIONS ==========
+  
+  const getPdfSource = () => {
+    if (materi.pdfUrl) {
+      return {
+        uri: materi.pdfUrl,
+        cache: true,
+      };
+    }
     
-    return contents[materiId] || contents[1];
+    if (materi.localPdfPath) {
+      return {
+        uri: materi.localPdfPath,
+        cache: true,
+      };
+    }
+
+    if (materi.pdfBase64) {
+      return {
+        uri: `data:application/pdf;base64,${materi.pdfBase64}`,
+        cache: false,
+      };
+    }
+
+    // Sample PDF for testing
+    return {
+      uri: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      cache: true,
+    };
   };
 
-  const materiContent = getMateriContent(materi.id);
+  const handlePdfLoadComplete = (numberOfPages, filePath) => {
+    console.log(`PDF loaded: ${numberOfPages} pages from ${filePath}`);
+    setTotalPages(numberOfPages);
+    setIsLoadingPDF(false);
+    setPdfError(null);
+    
+    const initialTimePerPage = {};
+    for (let i = 1; i <= numberOfPages; i++) {
+      initialTimePerPage[i] = 0;
+    }
+    
+    setTrackingData(prev => ({
+      ...prev,
+      timePerPage: initialTimePerPage,
+    }));
+  };
+
+  const handlePageChanged = (page, numberOfPages) => {
+    console.log(`Page changed to: ${page} of ${numberOfPages}`);
+    
+    const timeSpent = Math.floor((Date.now() - pageStartTime.current) / 1000);
+    
+    setIsLoadingPDF(false);
+    
+    setTrackingData(prev => {
+      const newData = { ...prev };
+      
+      if (currentPage > 0) {
+        newData.timePerPage[currentPage] = 
+          (newData.timePerPage[currentPage] || 0) + timeSpent;
+      }
+      
+      if (!newData.pagesRead.includes(page)) {
+        newData.pagesRead.push(page);
+      }
+      
+      return newData;
+    });
+    
+    setCurrentPage(page);
+    pageStartTime.current = Date.now();
+  };
+
+  const handlePdfError = (error) => {
+    console.error('PDF Error:', error);
+    setIsLoadingPDF(false);
+    setPdfError(error.message || 'Gagal memuat PDF. Periksa koneksi internet atau file PDF.');
+  };
+
+  const handlePdfLinkPress = (uri) => {
+    console.log(`PDF Link pressed: ${uri}`);
+    Alert.alert(
+      'Buka Link',
+      `Apakah Anda ingin membuka link ini?\n${uri}`,
+      [
+        { text: 'Batal', style: 'cancel' },
+        { 
+          text: 'Buka', 
+          onPress: () => Linking.openURL(uri)
+        }
+      ]
+    );
+  };
+
+  // ========== CAMERA & TRACKING FUNCTIONS ==========
 
   useEffect(() => {
-    initializePermissions();
-    
+    const timer = setTimeout(() => {
+      initializePermissions();
+    }, 100);
+
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       handleBackPress();
       return true;
     });
 
     return () => {
+      clearTimeout(timer);
       backHandler.remove();
       if (trackingInterval.current) {
         clearInterval(trackingInterval.current);
       }
     };
-  }, );
+  }, []);
 
   const initializePermissions = async () => {
     setIsLoadingPermission(true);
-    
+
     try {
-      // Check camera permission directly
+      if (!Camera || typeof Camera.getCameraPermissionStatus !== 'function') {
+        console.log('Camera module not ready, using simulation mode');
+        setCameraPermission(false);
+        setIsSimulatingEyeTracking(true);
+        startTracking();
+        setIsLoadingPermission(false);
+        return;
+      }
+
       const cameraPermissionStatus = await Camera.getCameraPermissionStatus();
       console.log('Camera permission status:', cameraPermissionStatus);
-      
+
       if (cameraPermissionStatus === 'granted' || cameraPermissionStatus === 'authorized') {
         setCameraPermission(true);
+        setCameraReady(true);
         startTracking();
       } else if (cameraPermissionStatus === 'not-determined') {
-        // Request permission
         const newPermissionStatus = await Camera.requestCameraPermission();
         console.log('New permission status:', newPermissionStatus);
-        
+
         if (newPermissionStatus === 'granted' || newPermissionStatus === 'authorized') {
           setCameraPermission(true);
+          setCameraReady(true);
           startTracking();
         } else {
           setCameraPermission(false);
@@ -417,7 +200,6 @@ iOS vs Android Guidelines:
           startTracking();
         }
       } else {
-        // Permission denied, use simulation
         setCameraPermission(false);
         setIsSimulatingEyeTracking(true);
         startTracking();
@@ -434,31 +216,36 @@ iOS vs Android Guidelines:
 
   const handleRequestPermission = async () => {
     setIsLoadingPermission(true);
-    
+
     try {
+      if (!Camera || typeof Camera.requestCameraPermission !== 'function') {
+        Alert.alert(
+          'Camera Not Available',
+          'Camera module is not available. Using simulation mode.',
+        );
+        setIsLoadingPermission(false);
+        return;
+      }
+
       const permissionStatus = await Camera.requestCameraPermission();
       console.log('Permission request result:', permissionStatus);
-      
+
       if (permissionStatus === 'granted' || permissionStatus === 'authorized') {
         setCameraPermission(true);
+        setCameraReady(true);
         setIsSimulatingEyeTracking(false);
-        // Restart tracking with camera
         startTracking();
       } else {
-        // Show alert to go to settings
         Alert.alert(
           'Izin Kamera Diperlukan',
           'Untuk menggunakan eye tracking yang akurat, mohon aktifkan izin kamera di pengaturan aplikasi.',
           [
             { text: 'Nanti Saja', style: 'cancel' },
-            { 
-              text: 'Buka Pengaturan', 
-              onPress: () => {
-                // Open app settings
-                Linking.openSettings();
-              }
-            }
-          ]
+            {
+              text: 'Buka Pengaturan',
+              onPress: () => Linking.openSettings(),
+            },
+          ],
         );
       }
     } catch (error) {
@@ -472,8 +259,8 @@ iOS vs Android Guidelines:
     setIsTracking(true);
     startTime.current = Date.now();
     lastFocusTime.current = Date.now();
-    
-    // Start simulated eye tracking if no camera permission
+    pageStartTime.current = Date.now();
+
     if (isSimulatingEyeTracking || !cameraPermission) {
       startSimulatedTracking();
     }
@@ -481,8 +268,7 @@ iOS vs Android Guidelines:
 
   const startSimulatedTracking = () => {
     trackingInterval.current = setInterval(() => {
-      // Simulate eye tracking with random focus/unfocus
-      const randomFocus = Math.random() > 0.25; // 75% chance of being focused
+      const randomFocus = Math.random() > 0.25;
       setCurrentFocus(randomFocus);
       updateTrackingData(randomFocus);
     }, 1000);
@@ -490,66 +276,99 @@ iOS vs Android Guidelines:
 
   const updateTrackingData = (isFocused) => {
     const now = Date.now();
-    
+
     setTrackingData(prev => {
       const newData = { ...prev };
       newData.totalTime += 1;
-      
+
       if (isFocused) {
         newData.focusTime += 1;
+        
+        if (currentPage > 0) {
+          newData.timePerPage[currentPage] = 
+            (newData.timePerPage[currentPage] || 0) + 1;
+        }
       } else {
         if (currentFocus === true) {
           newData.distractionCount += 1;
         }
       }
-      
-      newData.attentionScore = newData.totalTime > 0 
-        ? Math.round((newData.focusTime / newData.totalTime) * 100)
-        : 100;
-      
-      // Store eye movement data
+
+      newData.attentionScore =
+        newData.totalTime > 0
+          ? Math.round((newData.focusTime / newData.totalTime) * 100)
+          : 100;
+
       newData.eyeMovements.push({
         timestamp: now,
         focused: isFocused,
+        page: currentPage,
         simulated: isSimulatingEyeTracking || !cameraPermission,
       });
-      
+
       return newData;
     });
   };
 
   const handleBackPress = () => {
     setIsTracking(false);
-    
+
     if (trackingInterval.current) {
       clearInterval(trackingInterval.current);
     }
+
+    const finalTimeOnPage = Math.floor((Date.now() - pageStartTime.current) / 1000);
     
-    // Calculate final session data
     const sessionDuration = Math.floor((Date.now() - startTime.current) / 1000);
+    const pagesReadCount = trackingData.pagesRead.length;
+    const readingProgress = totalPages > 0 
+      ? Math.round((pagesReadCount / totalPages) * 100) 
+      : 0;
+
+    const updatedTimePerPage = { ...trackingData.timePerPage };
+    if (currentPage > 0) {
+      updatedTimePerPage[currentPage] = 
+        (updatedTimePerPage[currentPage] || 0) + finalTimeOnPage;
+    }
+
     const finalData = {
       materiId: materi.id,
       materiTitle: materi.title,
-      studentId: 'student_123', // This would come from user context
+      studentId: 'student_123',
       sessionStart: new Date(startTime.current).toISOString(),
       sessionEnd: new Date().toISOString(),
       sessionDuration,
       trackingMode: cameraPermission ? 'camera' : 'simulated',
-      ...trackingData,
+      totalPages,
+      pagesRead: pagesReadCount,
+      pagesReadList: trackingData.pagesRead,
+      readingProgress,
+      lastPage: currentPage,
+      timePerPage: updatedTimePerPage,
+      totalTime: trackingData.totalTime,
+      focusTime: trackingData.focusTime,
+      distractionCount: trackingData.distractionCount,
+      attentionScore: trackingData.attentionScore,
+      eyeMovements: trackingData.eyeMovements,
     };
-    
-    // Here you would save to database
+
     console.log('Saving tracking data:', finalData);
-    
+
     Alert.alert(
       'Sesi Pembelajaran Selesai',
-      `${materi.title}\n\nWaktu belajar: ${formatTime(trackingData.totalTime)}\nWaktu fokus: ${formatTime(trackingData.focusTime)}\nSkor perhatian: ${trackingData.attentionScore}%\nGangguan: ${trackingData.distractionCount}x${!cameraPermission ? '\n\n*Mode simulasi - untuk tracking akurat, berikan izin kamera' : ''}`,
+      `${materi.title}\n\n` +
+      `Waktu belajar: ${formatTime(trackingData.totalTime)}\n` +
+      `Waktu fokus: ${formatTime(trackingData.focusTime)}\n` +
+      `Skor perhatian: ${trackingData.attentionScore}%\n` +
+      `Gangguan: ${trackingData.distractionCount}x\n` +
+      `Halaman dibaca: ${pagesReadCount}/${totalPages} (${readingProgress}%)` +
+      `${!cameraPermission ? '\n\n*Mode simulasi aktif' : ''}`,
       [
-        { 
-          text: 'OK', 
-          onPress: () => navigation.goBack()
-        }
-      ]
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ],
     );
   };
 
@@ -571,6 +390,8 @@ iOS vs Android Guidelines:
     return 'Perlu Peningkatan';
   };
 
+  // ========== RENDER ==========
+
   if (isLoadingPermission) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -584,18 +405,21 @@ iOS vs Android Guidelines:
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
-      
-      {/* Header dengan tracking info */}
+
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Kembali</Text>
           </TouchableOpacity>
-          
+
           <View style={styles.trackingInfo}>
-            <View style={[styles.focusIndicator, { 
-              backgroundColor: currentFocus ? '#10B981' : '#EF4444' 
-            }]}>
+            <View
+              style={[
+                styles.focusIndicator,
+                { backgroundColor: currentFocus ? '#10B981' : '#EF4444' },
+              ]}
+            >
               <Text style={styles.focusText}>
                 {currentFocus ? '👁 Fokus' : '👁 Tidak Fokus'}
               </Text>
@@ -605,32 +429,33 @@ iOS vs Android Guidelines:
 
         <View style={styles.materiHeader}>
           <Text style={styles.materiTitle}>{materi.title}</Text>
-          <Text style={styles.materiSubtitle}>{materi.subtitle}</Text>
+          <Text style={styles.materiSubtitle}>
+            {materi.subtitle || 'Pembelajaran Interaktif dengan Eye Tracking'}
+          </Text>
         </View>
-        
-        {/* Camera container fixed di dalam header */}
+
+        {/* Camera container */}
         <View style={styles.cameraContainer}>
-          {cameraPermission && device && (
+          {cameraPermission && cameraReady && device ? (
             <Camera
               style={styles.camera}
               device={device}
               isActive={isTracking}
-              // Note: Face detection will be implemented with ML Kit separately
+              onError={(error) => {
+                console.error('Camera error:', error);
+                setCameraReady(false);
+              }}
             />
-          )}
-          
-          {/* Simulated camera view */}
-          {(!cameraPermission || isSimulatingEyeTracking) && (
+          ) : (
             <View style={styles.simulatedCamera}>
               <Text style={styles.simulatedCameraText}>📹</Text>
               <Text style={styles.simulatedLabel}>Simulasi</Text>
             </View>
           )}
         </View>
-        
-        {/* Permission button di bawah camera */}
+
         {!cameraPermission && (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleRequestPermission}
             style={styles.permissionButton}
             disabled={isLoadingPermission}
@@ -642,41 +467,92 @@ iOS vs Android Guidelines:
         )}
       </View>
 
-      {/* Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {materiContent.sections.map((section, index) => (
-          <View key={index} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <Text style={styles.sectionContent}>{section.content}</Text>
+      {/* PDF Viewer */}
+      <View style={styles.pdfContainer}>
+        {isLoadingPDF && (
+          <View style={styles.pdfLoading}>
+            <ActivityIndicator size="large" color="#4F46E5" />
+            <Text style={styles.pdfLoadingText}>Memuat PDF...</Text>
           </View>
-        ))}
-        
-        <View style={styles.bottomPadding} />
-      </ScrollView>
+        )}
 
-      {/* Stats panel tetap di bawah */}
+        {pdfError && (
+          <View style={styles.pdfError}>
+            <Text style={styles.pdfErrorText}>❌ Gagal Memuat PDF</Text>
+            <Text style={styles.pdfErrorDetail}>{pdfError}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => {
+                setPdfError(null);
+                setIsLoadingPDF(true);
+              }}
+            >
+              <Text style={styles.retryButtonText}>Coba Lagi</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+
+        <Pdf
+          ref={pdfRef}
+          trustAllCerts={true}
+          source={getPdfSource()}
+          onLoadComplete={handlePdfLoadComplete}
+          onPageChanged={handlePageChanged}
+          onError={handlePdfError}
+          onPressLink={handlePdfLinkPress}
+          style={styles.pdf}
+          enablePaging={true}
+          horizontal={false}
+          spacing={10}
+          enableAntialiasing={true}
+          enableAnnotationRendering={true}
+          // fitPolicy={0}
+        />
+      </View>
+
+      {/* Stats Panel */}
       <View style={styles.statsPanel}>
         <View style={styles.statsHeader}>
           <Text style={styles.statsTitle}>
-            Live Tracking {(!cameraPermission || isSimulatingEyeTracking) && '(Simulasi)'}
+            Live Tracking{' '}
+            {(!cameraPermission || isSimulatingEyeTracking) && '(Simulasi)'}
           </Text>
-          <Text style={styles.timeText}>⏱ {formatTime(trackingData.totalTime)}</Text>
+          <Text style={styles.timeText}>
+            ⏱ {formatTime(trackingData.totalTime)}
+          </Text>
         </View>
-        
+
+        <View style={styles.pageIndicator}>
+          <Text style={styles.pageText}>
+            📄 Halaman {currentPage} dari {totalPages}
+          </Text>
+          <Text style={styles.pagesReadText}>
+            Dibaca: {trackingData.pagesRead.length} halaman
+          </Text>
+        </View>
+
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Fokus</Text>
-            <Text style={styles.statValue}>{formatTime(trackingData.focusTime)}</Text>
+            <Text style={styles.statValue}>
+              {formatTime(trackingData.focusTime)}
+            </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Gangguan</Text>
-            <Text style={styles.statValue}>{trackingData.distractionCount}x</Text>
+            <Text style={styles.statValue}>
+              {trackingData.distractionCount}x
+            </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Skor</Text>
-            <Text style={[styles.statValue, { 
-              color: getAttentionColor(trackingData.attentionScore) 
-            }]}>
+            <Text
+              style={[
+                styles.statValue,
+                { color: getAttentionColor(trackingData.attentionScore) },
+              ]}
+            >
               {trackingData.attentionScore}%
             </Text>
           </View>
@@ -687,11 +563,14 @@ iOS vs Android Guidelines:
             Tingkat Perhatian: {getAttentionText(trackingData.attentionScore)}
           </Text>
           <View style={styles.progressBar}>
-            <View 
-              style={[styles.progressFill, {
-                width: `${trackingData.attentionScore}%`,
-                backgroundColor: getAttentionColor(trackingData.attentionScore)
-              }]}
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${trackingData.attentionScore}%`,
+                  backgroundColor: getAttentionColor(trackingData.attentionScore),
+                },
+              ]}
             />
           </View>
         </View>
@@ -776,7 +655,6 @@ const styles = StyleSheet.create({
     color: '#E0E7FF',
     fontSize: 14,
   },
-  // Fixed camera container styling
   cameraContainer: {
     position: 'absolute',
     top: 60,
@@ -785,8 +663,8 @@ const styles = StyleSheet.create({
     height: 75,
     borderRadius: 12,
     overflow: 'hidden',
-    elevation: 10, // Android shadow
-    shadowColor: '#000', // iOS shadow
+    elevation: 10,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -794,9 +672,6 @@ const styles = StyleSheet.create({
   camera: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#10B981',
   },
   simulatedCamera: {
     width: '100%',
@@ -818,7 +693,7 @@ const styles = StyleSheet.create({
   },
   permissionButton: {
     position: 'absolute',
-    top: 145, // Below camera
+    top: 145,
     right: 16,
     backgroundColor: '#F59E0B',
     paddingHorizontal: 12,
@@ -833,38 +708,76 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  content: {
+  pdfContainer: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  section: {
-    marginBottom: 30,
+    marginTop: 10,
+    marginHorizontal: 10,
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    overflow: 'hidden',
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 3,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1E293B',
-    marginBottom: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: '#4F46E5',
-    paddingBottom: 8,
+  pdf: {
+    flex: 1,
+    width: width - 20,
   },
-  sectionContent: {
+  pdfLoading: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    alignItems: 'center',
+    zIndex: 10,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    elevation: 5,
+  },
+  pdfLoadingText: {
+    marginTop: 10,
     fontSize: 16,
-    color: '#374151',
-    lineHeight: 26,
+    color: '#64748B',
   },
-  bottomPadding: {
-    height: 20,
+  pdfError: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -100 }, { translateY: -75 }],
+    width: 200,
+    padding: 20,
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    alignItems: 'center',
+    zIndex: 10,
+    elevation: 5,
+  },
+  pdfErrorText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#991B1B',
+    marginBottom: 8,
+  },
+  pdfErrorDetail: {
+    fontSize: 12,
+    color: '#991B1B',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
   statsPanel: {
     backgroundColor: '#FFFFFF',
@@ -883,7 +796,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   statsTitle: {
     fontSize: 18,
@@ -894,6 +807,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748B',
     fontWeight: '600',
+  },
+  pageIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  pageText: {
+    fontSize: 14,
+    color: '#1E293B',
+    fontWeight: '600',
+  },
+  pagesReadText: {
+    fontSize: 12,
+    color: '#64748B',
   },
   statsRow: {
     flexDirection: 'row',
