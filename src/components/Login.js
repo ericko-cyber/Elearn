@@ -10,13 +10,14 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 
-
 const LoginScreen = ({ navigation }) => {
-
- 
   const handleLogin = () => {
-    console.log("➡️ Pindah ke Home...");
-    navigation.replace('Home'); 
+    console.log('➡️ Pindah ke Home...');
+    navigation.replace('Home');
+  };
+  const handleTraining = () => {
+    console.log('➡️ Pindah ke TrainingFace...');
+    navigation.replace('TrainingFace'); // ganti 'Home' jadi 'TrainingFace'
   };
 
   return (
@@ -25,8 +26,10 @@ const LoginScreen = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Selamat Datang</Text>
@@ -35,7 +38,6 @@ const LoginScreen = ({ navigation }) => {
 
           {/* Form (tanpa logika validasi) */}
           <View style={styles.form}>
-
             {/* Email Input */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
@@ -53,7 +55,12 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.loginButtonText}>Masuk</Text>
             </TouchableOpacity>
 
-           {/* Register */}
+            {/* Tombol Login — langsung ke Home */}
+            <TouchableOpacity style={styles.Training} onPress={handleTraining}>
+              <Text style={styles.loginButtonText}>Training Capture</Text>
+            </TouchableOpacity>
+
+            {/* Register */}
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>Belum punya akun? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -122,6 +129,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
   },
   loginButton: {
+    backgroundColor: '#3498DB',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  Training: {
     backgroundColor: '#3498DB',
     borderRadius: 12,
     paddingVertical: 16,

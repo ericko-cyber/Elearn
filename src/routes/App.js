@@ -109,11 +109,12 @@
 //     textAlign: 'center',
 //   },
 // });
-
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import 'react-native-reanimated';
+
 
 // Import components & screens
 import HomeScreen from '../components/HomeScreen';
@@ -122,7 +123,8 @@ import BottomNavigation from '../components/BottomNavigation';
 import CameraScreen from '../components/CameraScreen';
 import LoginScreen from '../components/Login';
 import RegisterScreen from '../components/Register';
-import MateriEyeTrackingScreen from '../components/MateriEyeTracking'; // ✅ tambahkan ini
+import TrainingFace from '../components/TrainingFace';
+import MateriEyeTrackingScreen from '../components/MateriEyeTracking'; 
 
 const Stack = createNativeStackNavigator();
 
@@ -184,6 +186,8 @@ const App = () => {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Home" component={HomeScreenWithNav} />
+        <Stack.Screen name="Training" component={HomeScreenWithNav} />
+        <Stack.Screen name="TrainingFace" component={TrainingFace} />
         <Stack.Screen name="Profile" component={ProfileScreenWithNav} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Courses" component={CoursesScreen} />
