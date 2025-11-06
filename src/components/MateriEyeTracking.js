@@ -164,7 +164,7 @@ export default function MateriEyeTracking({ route, navigation }) {
         clearInterval(trackingInterval.current);
       }
     };
-  }, []);
+  }, );
 
   const initializePermissions = async () => {
     setIsLoadingPermission(true);
