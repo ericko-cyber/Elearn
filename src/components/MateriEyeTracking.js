@@ -20,6 +20,10 @@ const { width, height } = Dimensions.get('window');
 
 export default function MateriEyeTracking({ route, navigation }) {
   const { materi } = route.params;
+  // If you run the Python eye-tracker server on your dev machine, set the URL here
+  // Example: 'http://192.168.1.100:5000' (replace with your PC IP) or pass via route.params.serverUrl
+  const PYTHON_SERVER_URL = route.params?.serverUrl || 'http://192.168.0.103:5000';
+  const useRemoteServer = route.params?.useRemoteServer ?? true; // jika true, selalu polling server untuk gaze
 
   const [isTracking, setIsTracking] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(null);
@@ -42,9 +46,11 @@ export default function MateriEyeTracking({ route, navigation }) {
   
   const [currentFocus, setCurrentFocus] = useState(true);
   const [isSimulatingEyeTracking, setIsSimulatingEyeTracking] = useState(false);
+  const [serverConnected, setServerConnected] = useState(null); // null = unknown, true = connected, false = disconnected
 
   const device = useCameraDevice('front');
   const trackingInterval = useRef(null);
+  const remoteInterval = useRef(null);
   const lastFocusTime = useRef(Date.now());
   const startTime = useRef(Date.now());
   const pageStartTime = useRef(Date.now());
@@ -260,6 +266,10 @@ export default function MateriEyeTracking({ route, navigation }) {
     startTime.current = Date.now();
     lastFocusTime.current = Date.now();
     pageStartTime.current = Date.now();
+    // Mulai polling remote server bila diizinkan (terlepas dari status kamera)
+    if (useRemoteServer) {
+      startRemotePolling();
+    }
 
     if (isSimulatingEyeTracking || !cameraPermission) {
       startSimulatedTracking();
@@ -267,10 +277,74 @@ export default function MateriEyeTracking({ route, navigation }) {
   };
 
   const startSimulatedTracking = () => {
-    trackingInterval.current = setInterval(() => {
+    // Try to poll a remote Python server first (if available). Fall back to random simulation.
+    trackingInterval.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${PYTHON_SERVER_URL}/gaze`, { method: 'GET' });
+        // only treat as connected when server returns 200 (fresh data)
+        if (res.status === 200) {
+          setServerConnected(true);
+          let data = null;
+          try {
+            data = await res.json();
+          } catch (e) {
+            data = null;
+          }
+
+          if (data && data.gaze_text) {
+            const isFocused = data.gaze_text === 'CENTER';
+            setCurrentFocus(isFocused);
+            updateTrackingData(isFocused);
+            return;
+          }
+        } else {
+          // 204 No Content or other statuses -> server reachable but no fresh data
+          setServerConnected(false);
+        }
+      } catch (err) {
+        // network/server not available - fall back to local random simulation
+        console.warn('Gagal terhubung ke Python server:', err.message || err);
+        setServerConnected(false);
+      }
+
       const randomFocus = Math.random() > 0.25;
       setCurrentFocus(randomFocus);
       updateTrackingData(randomFocus);
+    }, 1000);
+  };
+
+  const startRemotePolling = () => {
+    // jika sudah berjalan, jangan buat lagi
+    if (remoteInterval.current) return;
+
+    remoteInterval.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${PYTHON_SERVER_URL}/gaze`, { method: 'GET' });
+        if (res.status === 200) {
+          setServerConnected(true);
+          let data = null;
+          try {
+            data = await res.json();
+          } catch (e) {
+            data = null;
+          }
+
+          if (data && data.gaze_text) {
+            const isFocused = data.gaze_text === 'CENTER';
+            // log eksplisit agar mudah dilihat di device log
+            console.log('[Remote gaze]', data);
+            setCurrentFocus(isFocused);
+            updateTrackingData(isFocused);
+            return;
+          }
+        } else {
+          // 204 or other statuses -> no fresh data
+          setServerConnected(false);
+        }
+      } catch (err) {
+        console.warn('Remote polling error:', err.message || err);
+        setServerConnected(false);
+      }
     }, 1000);
   };
 
