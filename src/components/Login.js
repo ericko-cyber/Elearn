@@ -50,14 +50,22 @@ const LoginScreen = ({ navigation }) => {
               <View style={styles.input} />
             </View>
 
-            {/* Tombol Login — langsung ke Home */}
+            {/* Tombol Login */}
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>Masuk</Text>
             </TouchableOpacity>
 
-            {/* Tombol Login — langsung ke Home */}
-            <TouchableOpacity style={styles.Training} onPress={handleTraining}>
-              <Text style={styles.loginButtonText}>Training Capture</Text>
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>atau</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Tombol Face Capture Training */}
+            <TouchableOpacity style={styles.faceCaptureButton} onPress={handleTraining}>
+              <Text style={styles.faceCaptureIcon}>📸</Text>
+              <Text style={styles.faceCaptureText}>Face Capture Training</Text>
             </TouchableOpacity>
 
             {/* Register */}
@@ -135,13 +143,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  Training: {
-    backgroundColor: '#3498DB',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   loginButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
@@ -162,18 +163,25 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
     fontSize: 14,
   },
-  socialButton: {
-    borderWidth: 1,
-    borderColor: '#E1E8ED',
+  faceCaptureButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#9B59B6',
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-  socialButtonText: {
-    color: '#2C3E50',
+  faceCaptureIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  faceCaptureText: {
+    color: '#9B59B6',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   registerContainer: {
     flexDirection: 'row',

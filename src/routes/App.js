@@ -13,7 +13,8 @@ import CameraScreen from '../components/CameraScreen';
 import LoginScreen from '../components/Login';
 import RegisterScreen from '../components/Register';
 //import TrainingFace from '../components/TrainingFace';
-import MateriEyeTrackingScreen from '../components/MateriEyeTracking'; 
+import MateriEyeTrackingScreen from '../components/MateriEyeTracking';
+import FaceCaptureScreen from '../components/FaceCapture'; 
 
 const Stack = createNativeStackNavigator();
 
@@ -82,7 +83,8 @@ const App = () => {
         <Stack.Screen name="Courses" component={CoursesScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Camera" component={CameraScreenNoNav} />
-        <Stack.Screen name="MateriEyeTracking" component={MateriEyeTrackingScreen} /> 
+        <Stack.Screen name="MateriEyeTracking" component={MateriEyeTrackingScreen} />
+        <Stack.Screen name="TrainingFace" component={FaceCaptureScreen} />
         {/* ✅ sudah didaftarkan */}
       </Stack.Navigator>
     </NavigationContainer>
