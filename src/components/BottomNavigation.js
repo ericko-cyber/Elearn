@@ -1,36 +1,58 @@
+import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { COLORS } from '../constants/colors';
 
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native'
+const NavItem = ({ icon, label, active, onPress }) => {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.navItem, active && styles.navItemActive]}
+      activeOpacity={0.7}
+    >
+      <Icon
+        name={icon}
+        size={24}
+        color={active ? COLORS.purple600 : COLORS.gray400}
+      />
+      <Text style={[styles.navLabel, active && styles.navLabelActive]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const BottomNavigation = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  
-  const navItems = [
-    { name: 'Home', icon: '🏠', route: 'Home' },
-    { name: 'My Courses', icon: '📚', route: 'Courses' },
-    { name: 'Notifications', icon: '🔔', route: 'Notifications' },
-    { name: 'Profile', icon: '👤', route: 'Profile' },
-  ];
 
   return (
-    <View style={styles.bottomNav}>
-      {navItems.map((item, index) => (
-        <TouchableOpacity 
-          key={index} 
-          style={styles.navItem}
-          onPress={() => navigation.navigate(item.route)}
-        >
-          <Text style={styles.navIcon}>{item.icon}</Text>
-          <Text style={[
-            styles.navText, 
-            route.name === item.route && styles.navTextActive
-          ]}>
-            {item.name}
-          </Text>
-        </TouchableOpacity>
-      ))}
+    <View style={styles.container}>
+      <NavItem
+        icon="home"
+        label="Beranda"
+        active={route.name === 'Home'}
+        onPress={() => navigation.navigate('Home')}
+      />
+      <NavItem
+        icon="book"
+        label="Materi"
+        active={route.name === 'Courses'}
+        onPress={() => navigation.navigate('Courses')}
+      />
+      <NavItem
+        icon="checkmark-circle"
+        label="Presensi"
+        active={route.name === 'RiwayatPresensi'}
+        onPress={() => navigation.navigate('RiwayatPresensi')}
+      />
+      <NavItem
+        icon="person"
+        label="Profil"
+        active={route.name === 'Profile'}
+        onPress={() => navigation.navigate('Profile')}
+      />
     </View>
   );
 };
@@ -38,34 +60,39 @@ const BottomNavigation = () => {
 export default BottomNavigation;
 
 const styles = StyleSheet.create({
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+  container: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.gray200,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 10,
   },
   navItem: {
-    flex: 1,
     alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
   },
-  navIcon: {
-    fontSize: 20,
-    marginBottom: 4,
+  navItemActive: {
+    backgroundColor: COLORS.purple50,
   },
-  navText: {
+  navLabel: {
     fontSize: 12,
-    color: '#64748B',
     fontWeight: '500',
+    color: COLORS.gray400,
+    marginTop: 4,
   },
-  navTextActive: {
-    color: '#4F46E5',
-    fontWeight: '600',
+  navLabelActive: {
+    color: COLORS.purple600,
   },
 });

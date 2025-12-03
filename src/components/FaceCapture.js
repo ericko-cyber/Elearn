@@ -11,11 +11,14 @@ import {
   Dimensions,
 } from 'react-native';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
+import axios from 'axios';
+import ProfilePhotoManager from '../utils/ProfilePhotoManager';
+import { API_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
 const FaceCapture = ({ route, navigation }) => {
-  const { userId, userName } = route.params || {};
+  const { userId, userName, nim, isUpdate } = route.params || {};
   
   const [cameraPermission, setCameraPermission] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -78,6 +81,12 @@ const FaceCapture = ({ route, navigation }) => {
       return;
     }
 
+    // Validasi userId dan nim
+    if (!userId || !nim) {
+      Alert.alert('Error', 'Data user tidak valid');
+      return;
+    }
+
     try {
       setIsCapturing(true);
       
@@ -90,10 +99,20 @@ const FaceCapture = ({ route, navigation }) => {
         qualityPrioritization: 'quality',
       });
 
-      console.log('Photo captured:', photo.path);
+      console.log('📸 Photo captured:', photo.path);
 
-      // TODO: Upload foto ke server FaceNet untuk training
-      // await uploadToFaceNetServer(photo.path, currentInstruction);
+      // PENTING: Simpan foto ke folder permanent SEBELUM upload
+      // Agar foto tidak hilang saat rebuild aplikasi
+      const savedPhotoPath = await ProfilePhotoManager.saveProfilePhoto(photo.path, nim);
+      
+      if (!savedPhotoPath) {
+        throw new Error('Gagal menyimpan foto ke storage');
+      }
+      
+      console.log('💾 Photo saved to permanent storage:', savedPhotoPath);
+
+      // Upload foto dari folder permanent ke server FaceNet untuk training
+      await uploadToFaceNetServer(savedPhotoPath);
 
       const newCount = capturedCount + 1;
       setCapturedCount(newCount);
@@ -106,10 +125,94 @@ const FaceCapture = ({ route, navigation }) => {
       }
 
     } catch (error) {
-      console.error('Error capturing photo:', error);
+      console.error('❌ Error capturing photo:', error);
       Alert.alert('Error', 'Gagal mengambil foto: ' + error.message);
     } finally {
       setIsCapturing(false);
+    }
+  };
+
+  const uploadToFaceNetServer = async (photoPath) => {
+    try {
+      console.log('📤 Uploading photo to FaceNet server...');
+      console.log('Photo path:', photoPath);
+      console.log('NIM:', nim);
+
+      // Buat FormData untuk upload
+      const formData = new FormData();
+      
+      // Tambahkan file foto dari permanent storage
+      formData.append('file', {
+        uri: photoPath.startsWith('file://') ? photoPath : `file://${photoPath}`,
+        type: 'image/jpeg',
+        name: `${nim}.jpg`,
+      });
+      
+      // Tambahkan username (NIM) - ini akan jadi nama embedding .pkl
+      formData.append('username', nim);
+
+      // Upload ke API /face/register
+      const response = await axios.post(
+        `${API_URL}/face/register`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          timeout: 30000, // 30 detik
+        }
+      );
+
+      console.log('✅ Upload response:', response.data);
+
+      if (response.data.status === 'success') {
+        // Foto sudah tersimpan di permanent storage sebelumnya
+        // Sekarang register ke database
+        await registerToDatabase(nim);
+        
+        console.log('✅ Face registration complete!');
+      } else {
+        throw new Error(response.data.message || 'Upload gagal');
+      }
+
+    } catch (error) {
+      console.error('❌ Error uploading to server:', error);
+      throw new Error('Gagal upload foto ke server: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const registerToDatabase = async (nim) => {
+    try {
+      console.log('💾 Registering to database...');
+      console.log('📤 Sending data:', { nim, embedding_filename: `${nim}.pkl` });
+      console.log('🔗 URL:', `${API_URL}/face-registration/register`);
+      
+      const response = await axios.post(
+        `${API_URL}/face-registration/register`,
+        {
+          nim: nim,
+          embedding_filename: `${nim}.pkl`,
+        },
+        { timeout: 10000 }
+      );
+
+      console.log('✅ Database registration response:', response.data);
+      Alert.alert('Sukses', 'Data berhasil disimpan ke database');
+    } catch (error) {
+      console.error('⚠️ Error registering to database:', error);
+      console.error('📊 Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      
+      // Tampilkan error detail ke user
+      Alert.alert(
+        'Peringatan Database',
+        `Database registration gagal: ${error.response?.data?.detail || error.message}\n\nEmbedding sudah tersimpan, tapi belum terdaftar di database.`
+      );
+      
+      // Tidak throw error karena embedding sudah tersimpan di file
     }
   };
 
@@ -117,21 +220,29 @@ const FaceCapture = ({ route, navigation }) => {
     setIsProcessing(true);
 
     try {
-      // TODO: Request ke server untuk proses training FaceNet
-      // await fetch('YOUR_SERVER_URL/finalize_training', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ userId, userName })
-      // });
-
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Training sudah selesai (foto sudah diupload)
+      console.log('✅ Training process complete!');
 
       Alert.alert(
-        'Training Berhasil! ✅',
-        `Foto wajah Anda telah berhasil diproses.\n\nAnda sekarang dapat login menggunakan face recognition.`,
+        isUpdate ? 'Update Berhasil! ✅' : 'Training Berhasil! ✅',
+        isUpdate 
+          ? `Foto wajah Anda telah berhasil diperbarui.\n\nData face recognition Anda sudah ter-update.`
+          : `Foto wajah Anda telah berhasil diproses.\n\nAnda sekarang dapat menggunakan face recognition untuk presensi.`,
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Login'),
+            onPress: () => {
+              if (isUpdate) {
+                // Jika update, kembali ke Profile
+                navigation.navigate('Profile');
+              } else {
+                // Jika first time, redirect ke Home
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home' }],
+                });
+              }
+            },
           },
         ],
       );
@@ -223,9 +334,14 @@ const FaceCapture = ({ route, navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Face Training</Text>
+        <Text style={styles.headerTitle}>
+          {isUpdate ? 'Update Face Recognition' : 'Face Recognition'}
+        </Text>
         <Text style={styles.headerSubtitle}>
-          Ambil foto wajah Anda untuk training
+          {isUpdate 
+            ? 'Update foto wajah Anda untuk memperbarui data face recognition.'
+            : 'Ambil foto wajah Anda untuk sistem presensi menggunakan face recognition.'
+          }
         </Text>
       </View>
 
@@ -269,7 +385,7 @@ const FaceCapture = ({ route, navigation }) => {
             {INSTRUCTIONS[currentInstruction]}
           </Text>
           <Text style={styles.instructionSubtext}>
-            Pastikan wajah berada di dalam oval
+            Pastikan wajah berada di dalam lingkaran oval
           </Text>
         </View>
 
@@ -289,21 +405,6 @@ const FaceCapture = ({ route, navigation }) => {
               <Text style={styles.captureButtonText}>📸 Ambil Foto</Text>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={handleSkip}
-            disabled={isCapturing || isProcessing}
-          >
-            <Text style={styles.skipButtonText}>Lewati</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Info Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            💡 Foto untuk face recognition
-          </Text>
         </View>
       </View>
     </SafeAreaView>
